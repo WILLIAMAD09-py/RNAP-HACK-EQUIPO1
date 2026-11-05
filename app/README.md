@@ -1,9 +1,10 @@
 # App
 
-Interface code for the voice ordering assistant. Technology is free (Streamlit, Gradio, Flask, etc.).
+Gradio interface for Receipt. It only calls `receipt.pipeline`, with no order logic of its own.
 
 The interface must:
-- Receive a new voice note or text input
-- Transcribe it (Whisper)
-- Extract the order fields (product, quantity, price, etc.)
-- Show the output requested by the challenge
+
+- Record with the microphone or upload an audio file
+- Show the transcript and an editable ticket
+- Highlight the fields that need confirmation
+- Add the confirmed order to the day's list

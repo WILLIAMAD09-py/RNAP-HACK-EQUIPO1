@@ -2,11 +2,11 @@
 
 Fuente única de verdad del proyecto. La leen OpenCode y Antigravity de forma nativa, y Claude Code mediante `CLAUDE.md`. Todo cambio de entregables, flujo o reglas se hace **aquí**. `CLAUDE.md` y `GEMINI.md` solo guardan lo específico de cada herramienta.
 
-**Fase actual: planeación. No escribir código hasta que el equipo lo autorice.**
+**Forma de trabajo: aplicación en Python normal.** Primero el flujo completo por línea de comandos en `receipt/`, y después la interfaz en `app/`, que solo llama a `receipt.pipeline`. No se desarrolla en cuadernos.
 
 ## 1. Producto
 
-**Reto 3: From Voice Note to Order.** El cliente es **Ferretería Los Nogales** (empresa ficticia), que entrega en obras del área de Monterrey. Sus clientes piden por notas de voz de WhatsApp, el personal las captura a mano y se equivoca en cantidades y medidas: una vez pidieron cable del 12 y mandaron 50 metros del 10.
+**Receipt** es nuestro producto para el **Reto 3: From Voice Note to Order.** El cliente es **Ferretería Los Nogales** (empresa ficticia), que entrega en obras del área de Monterrey. Sus clientes piden por notas de voz de WhatsApp, el personal las captura a mano y se equivoca en cantidades y medidas: una vez pidieron cable del 12 y mandaron 50 metros del 10.
 
 **Reto:** convertir una nota de voz en español en un ticket de pedido.
 
@@ -25,7 +25,7 @@ Fuente única de verdad del proyecto. La leen OpenCode y Antigravity de forma na
 
 **Métricas:** WER (`jiwer` o `evaluate`) y % de campos correctos, más el tiempo de cada modelo.
 
-**Integrantes:** William, Jack, Carlos y Jesús. En `PROGRESS.md` aparece el nombre "Receipt".
+**Integrantes:** William, Jack, Carlos y Jesús.
 
 Fuentes del curso, en la raíz del repo: `RNAP_Hack_2026_Challenge_Tracks.docx`, `RNAP_Hack_2026_Instrucciones_Redes_Neuronales.docx`, `RNAP_Hack_2026_Guia_GitHub.docx` y `RNAP_Hack_2026_English_Instructions.docx`. Si este archivo y un `.docx` se contradicen, manda el `.docx`.
 
@@ -34,16 +34,7 @@ Fuentes del curso, en la raíz del repo: `RNAP_Hack_2026_Challenge_Tracks.docx`,
 | # | Bloqueo | Qué detiene |
 |---|---|---|
 | B1 | **No hay audio.** El brief exige que el equipo grabe 30+ notas de voz con voces, velocidades y ruido distintos, cada una con su ticket correcto | WER, Whisper y toda evaluación real |
-| B2 | `notebooks/entrenamiento.ipynb` es JSON inválido: a cada celda le falta cerrar `source` con `]`, y a las de código les faltan `outputs` y `execution_count` | Abrirlo en Colab o Jupyter |
-| B3 | El cuaderno aún no cumple la Fase 1 (ver abajo) | Hasta 40 puntos de la lista de cotejo |
-
-**Brechas del cuaderno frente a la Fase 1:**
-
-- Whisper nunca se ejecuta: la fila "Whisper small + regex" en realidad evalúa regex sobre texto sintético.
-- El preentrenado se pospone a la Fase 2, pero la Fase 1 lo exige sobre el mismo conjunto de prueba.
-- No se mide WER ni tiempo.
-- Solo se evalúan producto y cantidad. Faltan cliente, medida y hora de entrega.
-- La conclusión está escrita a mano en un `print`: debe salir de los resultados reales.
+| B2 | `notebooks/entrenamiento.ipynb` es JSON inválido y no abre. Se reemplaza por el reporte de la sección 3.1 | Secciones 1 a 3 del reporte |
 
 El catálogo `data/catalog.csv` ya cumple: 42 productos, dentro del rango de 30 a 50.
 
@@ -56,7 +47,7 @@ El catálogo `data/catalog.csv` ya cumple: 42 productos, dentro del rango de 30 
 5. **Lo subido después de un checkpoint queda fuera de esa fase.** Lo subido después de `v1.0` queda fuera de la Fase 3.
 6. **Las claves de API nunca van al repo.** Se guardan en Secretos de Colab y en los secretos del servicio de publicación.
 7. **Los datos pesados no van al repo.** En `data/` va una muestra pequeña o el enlace a la fuente.
-8. **`notebooks/entrenamiento.ipynb` lo integra una sola persona.** Cada integrante trabaja en `notebooks/<nombre>_<tema>.ipynb`.
+8. **Todo el código vive en `receipt/` y `app/`.** Cada integrante trabaja en su parte y sube cambios pequeños. El cuaderno `notebooks/entrenamiento.ipynb` es solo el reporte.
 9. **`README.md` y `PROGRESS.md` van en inglés.** El cuaderno va en español.
 10. **No inventar resultados.** Toda cifra en cuaderno, README, reportes o presentación sale de una ejecución real y debe coincidir con el repo.
 11. **Cualquier integrante debe poder explicar el modelo, el código y la atención.** El juez elige a quién preguntar, así que todo lo que hace un agente se le explica al equipo.
@@ -68,7 +59,9 @@ El catálogo `data/catalog.csv` ya cumple: 42 productos, dentro del rango de 30 
 
 Se dividen por materia, luego por fase, y cada fase en paquetes de trabajo. `Pts` es el valor en el instrumento de evaluación. Responsable: **Agente**, **Persona** o **Ambos**.
 
-### 3.1 Redes Neuronales: cuaderno `notebooks/entrenamiento.ipynb`
+### 3.1 Redes Neuronales: reporte `notebooks/entrenamiento.ipynb`
+
+El curso exige este archivo y vale 25 puntos en el PIA, así que **no se borra**. Ya no es donde se programa: lleva el texto de las secciones y muestra resultados leídos de `results/`, llamando al código de `receipt/`.
 
 | Sección | Contenido | Fase |
 |---|---|---|
@@ -83,7 +76,7 @@ Se dividen por materia, luego por fase, y cada fase en paquetes de trabajo. `Pts
 
 | ID | Paquete | Pts | Responsable |
 |---|---|---|---|
-| F1.0 | Reparar el cuaderno (B2) y completar `requirements.txt` | — | Agente |
+| F1.0 | Paquete `receipt/`, pruebas y `requirements.txt` | — | Agente |
 | F1.1 | `PROGRESS.md` describe el problema y la métrica principal | 10 | Ambos |
 | F1.2 | Justificar la representación del modelo base (reglas con expresiones regulares) | 10 | Ambos |
 | F1.3a | Grabar las notas de voz y escribir su ticket correcto | — | Persona |
@@ -213,33 +206,64 @@ Los parámetros que se documentan con su efecto son tamaño de Whisper, prompt i
 **Interfaz y publicación:**
 
 - Gradio con micrófono y carga de audio, transcripción, ticket editable, botón de confirmar y lista del día.
-- En clase se corre desde Colab con `share=True`.
+- Durante clase se puede compartir con `share=True` de Gradio.
 - Versión final en Hugging Face Spaces (CPU gratuita) o en la laptop del equipo. Se elige midiendo la velocidad, y el otro queda de respaldo.
 - El micrófono del navegador exige HTTPS o `localhost`, así que se prueba en el mismo modo en que se va a presentar.
 - Los modelos se cargan una sola vez al iniciar, nunca en cada petición.
 
-**Entorno:** Colab es el entorno de referencia. El código funciona en CPU, usa GPU si existe, fija semillas y no usa rutas absolutas.
+**Entorno:** Python 3.11 en `.venv/`. El código funciona en CPU, usa GPU si existe, fija semillas y no usa rutas absolutas. El audio se decodifica con PyAV, sin depender de `ffmpeg`.
+
+**Estructura:**
+
+```text
+receipt/           lógica de la aplicación, sin interfaz
+  config.py        rutas, modos y modelos
+  ticket.py        ticket y sus campos
+  audio.py         carga de audio
+  numbers.py       números en español
+  catalog.py       catálogo y emparejamiento
+  transcription.py Whisper
+  extraction/      rules.py (base) y llm.py (Transformer)
+  pipeline.py      audio a ticket
+  dataset.py       notas de voz y división
+  evaluation.py    WER, campos y tiempos
+  orders.py        lista de pedidos confirmados
+app/               interfaz Gradio
+tests/             pruebas sin modelos ni red
+results/           métricas de cada corrida
+```
+
+**Comandos:**
+
+```bash
+python -m receipt process <audio> --mode baseline
+python -m receipt split
+python -m receipt evaluate --mode baseline --split val
+python -m receipt compare
+```
 
 ## 5. Flujo por paquete de trabajo
 
-1. **Sincronizar:** `git pull --rebase`. Los compañeros también suben desde navegador y Colab.
+1. **Sincronizar:** `git pull --rebase`. Los compañeros también suben desde el navegador.
 2. **Elegir** el siguiente paquete desbloqueado de la sección 3 y leer su criterio en el `.docx`.
 3. **Planear:** el orquestador define archivos, criterio de terminado y modelo.
 4. **Delegar** con la plantilla de la sección 6. Instalación al instalador, código al programador.
-5. **Resultados primero:** el worker reporta cifras de una corrida rápida antes de ejecutar el cuaderno completo.
+5. **Resultados primero:** el worker reporta cifras de una corrida rápida con pocas notas antes de la evaluación completa.
 6. **Revisar:** el orquestador compara el diff contra la rúbrica y corre la verificación. Si falla, regresa observaciones concretas al worker.
 7. **Commit** del cambio significativo (sección 7).
 8. **Bitácora:** actualizar la entrada del checkpoint en `PROGRESS.md`.
-9. **Explicar:** dejar en el cuaderno, en lenguaje simple, qué se hizo y por qué, para que el equipo pueda defenderlo.
+9. **Explicar:** dejar en el reporte, en lenguaje simple, qué se hizo y por qué, para que el equipo pueda defenderlo.
 
 Verificación mínima antes de dar algo por terminado:
 
-- El cuaderno es JSON válido y abre en Colab.
-- Corre de principio a fin desde cero, sin errores.
-- Las cifras del texto coinciden con las salidas.
+- `python -m pytest -q` pasa completo.
+- El flujo corre de principio a fin con un audio real.
+- Las cifras del reporte coinciden con `results/`.
 - No hay secretos ni datos pesados en el diff.
 
-Cambios mínimos sobre lo que ya funciona. No reescribir. El cuaderno completo se ejecuta una vez al final, no en cada iteración.
+Cambios mínimos sobre lo que ya funciona. No reescribir. Se evalúa en validación mientras se desarrolla, y el conjunto de prueba se usa solo para las métricas finales.
+
+**Comentarios:** no escribir comentarios ni docstrings en el código, salvo que algo no se entienda sin ellos. Usar nombres descriptivos.
 
 ## 6. Orquestación de agentes
 
@@ -247,7 +271,7 @@ Cambios mínimos sobre lo que ya funciona. No reescribir. El cuaderno completo s
 |---|---|---|
 | **Orquestador** | Planea, divide, delega, revisa, integra y hace commits | Escribir el código directamente |
 | **Instalador** | Entorno, dependencias, descargas, verificación de imports | Cambiar código del proyecto |
-| **Programador** | Código, cuadernos, interfaz, corridas y métricas | Commits, push, cambiar el alcance |
+| **Programador** | Código, interfaz, corridas y métricas | Commits, push, cambiar el alcance |
 
 **Modelos por herramienta:**
 
@@ -284,7 +308,7 @@ Si falta información, detente y pregunta; no supongas.
 </restricciones>
 <terminado>
 Criterios verificables, con el comando que los comprueba.
-Ejemplo: el cuaderno corre completo e imprime WER y % de campos para ambos modelos.
+Ejemplo: `python -m receipt compare` imprime WER y % de campos para ambos modelos.
 </terminado>
 <reporte>
 Devuelve: archivos cambiados, comandos ejecutados con su resultado real,
@@ -294,7 +318,7 @@ cifras obtenidas, lo que quedó sin hacer y dudas. Máximo 200 palabras.
 
 **Instalador, además:** usar entorno virtual `.venv/`, fijar versiones que funcionaron en `requirements.txt`, comprobar cada import y reportar la versión de cada paquete. No instalar nada global.
 
-**Programador, además:** reutilizar el código existente, fijar semillas, mantener compatibilidad con Colab, hacer primero una corrida rápida con una muestra y reportar las cifras antes de la ejecución completa.
+**Programador, además:** reutilizar el código existente, fijar semillas, sin comentarios innecesarios, hacer primero una corrida rápida con una muestra y reportar las cifras antes de la ejecución completa.
 
 ## 7. Control de versiones
 
@@ -327,7 +351,7 @@ cifras obtenidas, lo que quedó sin hacer y dudas. Máximo 200 palabras.
 **Procedimiento de checkpoint**, entre 10 y 15 minutos antes de terminar la clase:
 
 1. Cada integrante guarda su trabajo en GitHub.
-2. El responsable guarda el cuaderno principal y la interfaz si cambió.
+2. El responsable actualiza el reporte y sube la interfaz si cambió.
 3. Se agrega la entrada al **inicio** de `PROGRESS.md`, en inglés:
 
 ```markdown
@@ -358,6 +382,5 @@ Pendiente:
 ## 9. Decisiones pendientes del equipo
 
 - [ ] Definir responsable del repositorio y responsable del cuaderno.
-- [ ] Confirmar si "Receipt" es el nombre del equipo o del producto.
 - [ ] Repartir la grabación de las notas de voz.
-- [ ] Elegir el modelo de lenguaje para la extracción.
+- [ ] Elegir el modelo de lenguaje para la extracción. Por ahora, `qwen3:4b` local con Ollama.
