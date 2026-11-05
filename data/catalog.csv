@@ -1,0 +1,43 @@
+id,nombre,categoria,sinonimos,unidad,medida
+CAB-001,Cable THW calibre 8,Cable,cable del ocho|cable calibre ocho|cable ocho,metro,calibre 8
+CAB-002,Cable THW calibre 10,Cable,cable del diez|cable calibre diez|cable diez,metro,calibre 10
+CAB-003,Cable THW calibre 12,Cable,cable del doce|cable calibre doce|cable doce,metro,calibre 12
+CAB-004,Cable THW calibre 14,Cable,cable del catorce|cable calibre catorce|cable catorce,metro,calibre 14
+CAB-005,Rollo de cable THHN calibre 12 (100 m),Cable,rollo de cable doce|cable doce en rollo|rollo doce,rollo,calibre 12
+CAB-006,Cable coaxial RG-6,Cable,cable coaxial|coaxial|cable para antena,metro,RG-6
+CAB-007,Cable UTP categoria 6,Cable,cable de red|cable cat seis|cable utp|cable para red,metro,Cat6
+TUB-001,Tubo conduit PVC 1/2 pulgada,Tubo,tubo de media|tubo media pulgada|tubo de medio|tubo conduit media,pieza 3 m,1/2 pulgada
+TUB-002,Tubo conduit PVC 3/4 pulgada,Tubo,tubo de tres cuartos|tubo de 3/4|tubo tres cuartos conduit,pieza 3 m,3/4 pulgada
+TUB-003,Tubo conduit PVC 1 pulgada,Tubo,tubo de una pulgada|tubo de 1 pulgada|tubo conduit una pulgada,pieza 3 m,1 pulgada
+TUB-004,Tubo PVC hidraulico 1/2 pulgada,Tubo,tubo de agua media|tubo hidraulico media|tubo de agua de media,pieza 6 m,1/2 pulgada
+TUB-005,Tubo PVC hidraulico 3/4 pulgada,Tubo,tubo de agua tres cuartos|tubo hidraulico tres cuartos,pieza 6 m,3/4 pulgada
+VAR-001,Varilla corrugada 3/8,Acero,varilla tres ocho|varilla de 3/8|varilla de tres octavos,pieza 12 m,3/8 pulgada
+VAR-002,Varilla corrugada 1/2,Acero,varilla media|varilla de media|varilla de 1/2,pieza 12 m,1/2 pulgada
+VAR-003,Varilla corrugada 5/8,Acero,varilla cinco ocho|varilla de 5/8|varilla de cinco octavos,pieza 12 m,5/8 pulgada
+ACE-001,Alambron recocido,Acero,alambre recocido|alambre de amarre|alambre para amarrar,kilo,calibre 18
+ACE-002,Malla electrosoldada 6x6,Acero,malla|malla electrosoldada|malla de seis por seis,hoja 2.4x6 m,6x6
+ACE-003,Lamina galvanizada calibre 26,Acero,lamina|lamina galvanizada|lamina de zinc,hoja 1.22x2.44 m,calibre 26
+MAT-001,Cemento gris 50 kg,Materiales,bulto de cemento|cemento|saco de cemento|cemento gris,bulto,50 kg
+MAT-002,Cemento blanco 25 kg,Materiales,cemento blanco|bulto blanco,bulto,25 kg
+MAT-003,Arena de rio,Materiales,arena|arena de rio|metro de arena,m3,m3
+MAT-004,Grava 3/4,Materiales,grava|piedra de tres cuartos|grava de 3/4,m3,3/4 pulgada
+MAT-005,Tabique rojo recocido,Materiales,tabique|ladrillo rojo|tabique rojo,millar,millar
+MAT-006,Block de concreto 15x20x40,Materiales,block|blok|bloque de concreto|bloque,pieza,15x20x40
+MAT-007,Yeso de construccion 40 kg,Materiales,yeso|bulto de yeso,bulto,40 kg
+PIN-001,Pintura vinilica blanca 19 L,Pintura,pintura blanca|cubeta de pintura|pintura vinilica,cubeta,19 L
+PIN-002,Impermeabilizante acrilico 19 L,Pintura,impermeabilizante|impermeabilizante blanco|cubeta de impermeabilizante,cubeta,19 L
+FIJ-001,Tornillo cabeza plana 1 1/2 pulgada,Fijaciones,tornillos de pulgada y media|tornillo de una pulgada y media,caja 100 pzas,1 1/2 pulgada
+FIJ-002,Tornillo para pladur 6x1,Fijaciones,tornillo pladur|tornillo para tablaroca|tornillo tablaroca,caja 100 pzas,6x1
+FIJ-003,Taquete 1/4,Fijaciones,taquete|taquetes de un cuarto|taquete de cuarto,pieza,1/4 pulgada
+FIJ-004,Clavo de 2 pulgadas,Fijaciones,clavos de dos pulgadas|clavo de dos|clavo dos pulgadas,kilo,2 pulgadas
+FIJ-005,Clavo de 3 pulgadas,Fijaciones,clavos de tres pulgadas|clavo de tres|clavo tres pulgadas,kilo,3 pulgadas
+FIJ-006,Pija 1/4 x 2,Fijaciones,pijas|pija de un cuarto|pija de cuarto,caja 100 pzas,1/4 x 2 pulgadas
+ELE-001,Cinta aislante negra,Electrico,cinta negra|cinta de aislar|cinta aislante,pieza,negra
+ELE-002,Interruptor sencillo,Electrico,apagador|switch|apagador sencillo,pieza,sencillo
+ELE-003,Contacto doble polarizado,Electrico,contacto|enchufe doble|contacto doble,pieza,doble
+ELE-004,Caja de registro 20x20,Electrico,caja de registro|registro|caja cuadrada,pieza,20x20
+PLO-001,Codo PVC 90 grados 1/2,Plomeria,codo de media|codo media pulgada|codo de 90 de media,pieza,1/2 pulgada
+PLO-002,Cople PVC 3/4,Plomeria,cople de tres cuartos|cople de 3/4|cople tres cuartos,pieza,3/4 pulgada
+PLO-003,Llave de paso 1/2,Plomeria,llave de paso media|llave de paso|llave de media,pieza,1/2 pulgada
+PLO-004,Pegamento para PVC 250 ml,Plomeria,pegamento|pegamento para tubo|pegamento pvc,pieza,250 ml
+PLO-005,Cinta teflon,Plomeria,teflon|cinta de teflon|cinta para rosca,pieza,12 mm

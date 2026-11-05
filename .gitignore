@@ -30,6 +30,7 @@ env/
 data/*.wav
 data/*.mp3
 data/*.csv
+!data/catalog.csv
 data/*.json
 data/*.zip
 
