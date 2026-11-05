@@ -31,6 +31,9 @@ data/*.wav
 data/*.mp3
 data/*.csv
 !data/catalog.csv
+!data/notes.csv
+!data/splits.csv
+data/audio/
 data/*.json
 data/*.zip
 
