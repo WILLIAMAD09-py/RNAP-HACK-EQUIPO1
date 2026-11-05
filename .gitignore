@@ -29,6 +29,10 @@ env/
 # Data / Audio (heavy files - do not upload)
 data/*.wav
 data/*.mp3
+data/*.ogg
+data/*.opus
+data/*.m4a
+data/*.webm
 data/*.csv
 !data/catalog.csv
 !data/notes.csv
