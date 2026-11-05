@@ -2,22 +2,25 @@
 
 ## CP2 - 2026-11-05
 
-### What we have done:
-- Created the team repository for Receipt (Track 3: Voice Note to Order)
-- Set up repository structure (README.md, PROGRESS.md, notebooks/, app/, data/, requirements.txt)
-- Defined Reto 3: Voice Note to Order
+- What we have done:
+  - Created the team repository for Receipt (Track 3: Voice Note to Order)
+  - Set up repository structure (README.md, PROGRESS.md, notebooks/, app/, data/, requirements.txt)
+  - Wrote receipt/ application logic (config, ticket, audio, numbers, catalog, transcription, extraction/rules+llm, pipeline, dataset, evaluation, orders)
+  - Added data/catalog.csv with 42 products
+  - Wrote notebooks/entrenamiento.ipynb sections 1, 2, and 3 (based on synthetic data from catalog)
+  - Updated requirements.txt (added jiwer, av)
 
-### What we haven't done yet:
-- Load and split voice/audio data into train / validation / test
-- Train Whisper small + regex baseline model
-- Apply larger Whisper + LLM extraction (pre-trained, no fine-tuning)
-- Write sections 1, 2, and 3 of the training notebook
-- Fill the comparison table with WER and % of correct fields
+- What we haven't done yet:
+  - Load and split real voice/audio data into train / validation / test (data/notes.csv has only the header)
+  - Run Whisper small + regex baseline on real audio
+  - Run larger Whisper + LLM extraction (pre-trained, no fine-tuning)
+  - Generate results/ with WER, % of correct fields, and processing time
+  - Commit receipt/ and requirements.txt to the repository
 
-### Next step:
-- Load audio data, split it, train baseline and pre-trained model, and complete sections 1-3 of notebooks/entrenamiento.ipynb
+- Next step:
+  - Complete F1.3b-F1.8 (load/split data, baseline and pre-trained model, WER and % campos correctos, tiempo, comparison table), then commit CP2 and push in class schedule
 
-### Who did what:
-- To be defined by team members
+- Who did what:
+  - To be defined by team members; each integrante needs at least one own commit in this phase (F1.10)
 
 ---
