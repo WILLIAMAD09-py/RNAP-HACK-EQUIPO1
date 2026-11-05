@@ -1,49 +1,39 @@
-from __future__ import annotations
+from receipt.config import SAMPLE_RATE
 
-DEFAULT_WHISPER = "small"
-LANGUAGE = "es"
-MUESTRAS_POR_SEGUNDO = 16000
+LONG_FORM_SAMPLES = 30 * SAMPLE_RATE
+MAX_NEW_TOKENS = 128
+MAX_PROMPT_TOKENS = 120
 
-
-def _cargar_audio(ruta, sample_rate: int = MUESTRAS_POR_SEGUNDO):
-    import av
-    import numpy as np
-
-    contenedor = av.open(ruta)
-    stream = contenedor.streams.audio[0]
-    resampler = av.audio.resampler.AudioResampler(
-        format="s16", layout="mono", rate=sample_rate
-    )
-    trozos = []
-    for frame in contenedor.decode(stream):
-        for out_frame in resampler.resample(frame):
-            trozos.append(out_frame.to_ndarray())
-    contenedor.close()
-    if not trozos:
-        return np.zeros(0, dtype=np.float32)
-    audio = np.concatenate(trozos, axis=1).ravel().astype(np.float32)
-    return audio / 32768.0
+_loaded = {}
 
 
-class Transcriptor:
-    def __init__(self, modelo: str = DEFAULT_WHISPER, idioma: str = LANGUAGE):
-        self.modelo = modelo
-        self.idioma = idioma
-        self._model = None
+def load_model(name):
+    if name not in _loaded:
+        import torch
+        from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-    def cargar(self):
-        if self._model is None:
-            import whisper
-            self._model = whisper.load_model(self.modelo)
-        return self._model
-
-    def transcribir(self, audio) -> str:
-        model = self.cargar()
-        result = model.transcribe(audio, language=self.idioma, fp16=False)
-        return result.get("text", "").strip()
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        dtype = torch.float16 if device == "cuda" else torch.float32
+        processor = WhisperProcessor.from_pretrained(name)
+        model = WhisperForConditionalGeneration.from_pretrained(name, dtype=dtype).to(device).eval()
+        _loaded[name] = (processor, model, device, dtype)
+    return _loaded[name]
 
 
-def transcribir_archivo(ruta_audio, modelo: str = DEFAULT_WHISPER) -> str:
-    audio = _cargar_audio(ruta_audio)
-    transcriptor = Transcriptor(modelo=modelo)
-    return transcriptor.transcribir(audio)
+def transcribe(audio, model_name, vocabulary=None):
+    import torch
+
+    processor, model, device, dtype = load_model(model_name)
+    long_form = len(audio) > LONG_FORM_SAMPLES
+    inputs = processor(audio, sampling_rate=SAMPLE_RATE, return_tensors="pt", **(
+        {"truncation": False, "padding": "longest", "return_attention_mask": True} if long_form else {}))
+    options = {"language": "es", "task": "transcribe", "max_new_tokens": MAX_NEW_TOKENS}
+    if vocabulary:
+        prompt_ids = processor.get_prompt_ids(vocabulary, return_tensors="pt")
+        options["prompt_ids"] = prompt_ids[:MAX_PROMPT_TOKENS].to(device)
+    if long_form:
+        options["attention_mask"] = inputs.attention_mask.to(device)
+        options["return_timestamps"] = True
+    with torch.inference_mode():
+        generated = model.generate(inputs.input_features.to(device, dtype), **options)
+    return processor.batch_decode(generated, skip_special_tokens=True)[0].strip()

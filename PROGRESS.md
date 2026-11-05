@@ -3,6 +3,8 @@
 ## CP2 - 2026-11-05
 
 - What we have done:
+  - Problem: Ferretería Los Nogales receives orders as Spanish voice notes and types them by hand, with mistakes in quantities and sizes. Receipt turns a voice note into an order ticket with customer, product, quantity, size and delivery time.
+  - Main metrics: WER for the transcript and percentage of correct ticket fields, plus processing time for each model.
   - Created the team repository for Receipt (Track 3: Voice Note to Order)
   - Set up repository structure (README.md, PROGRESS.md, notebooks/, app/, data/, requirements.txt)
   - Wrote receipt/ application logic (config, ticket, audio, numbers, catalog, transcription, extraction/rules+llm, pipeline, dataset, evaluation, orders)
@@ -15,7 +17,6 @@
   - Run Whisper small + regex baseline on real audio
   - Run larger Whisper + LLM extraction (pre-trained, no fine-tuning)
   - Generate results/ with WER, % of correct fields, and processing time
-  - Commit receipt/ and requirements.txt to the repository
 
 - Next step:
   - Complete F1.3b-F1.8 (load/split data, baseline and pre-trained model, WER and % campos correctos, tiempo, comparison table), then commit CP2 and push in class schedule

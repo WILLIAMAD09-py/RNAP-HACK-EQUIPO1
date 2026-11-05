@@ -1,45 +1,85 @@
-from __future__ import annotations
+import time
+from dataclasses import dataclass
 
-import pandas as pd
-
-from .config import CATALOG_CSV
-from .ticket import Ticket
-from .transcription import transcribir_archivo
-from .extraction.rules import extraer_con_reglas
-
-DEFAULT_MODE = "baseline"
-MODE_PREENTRENADO = "preentrenado"
-
-
-def _cargar_catalogo():
-    df = pd.read_csv(CATALOG_CSV)
-    return df.to_dict("records")
+from receipt import catalog as catalog_module
+from receipt import transcription
+from receipt.audio import load_audio
+from receipt.config import MODES
+from receipt.extraction import llm, rules
+from receipt.numbers import normalize_text
+from receipt.ticket import TICKET_FIELDS, Ticket
 
 
-def _extraer_transformer(texto, catalogo):
-    from .extraction.transformer import ExtraccionTransformer
-    return ExtraccionTransformer().extraer(texto, catalogo)
+@dataclass
+class PipelineResult:
+    transcription: str
+    ticket: Ticket
+    transcription_seconds: float
+    extraction_seconds: float
+    used_fallback: bool
 
 
-def audio_a_ticket(ruta_audio, modo=DEFAULT_MODE):
-    texto = transcribir_archivo(ruta_audio)
-    catalogo = _cargar_catalogo()
-    if modo == DEFAULT_MODE:
-        campos = extraer_con_reglas(texto, catalogo)
+def get_mode(mode):
+    if mode not in MODES:
+        raise ValueError(f"Modo desconocido: {mode}. Opciones: {', '.join(MODES)}")
+    return MODES[mode]
+
+
+def load_models(mode):
+    settings = get_mode(mode)
+    start = time.perf_counter()
+    transcription.load_model(settings["whisper"])
+    if settings["embeddings"]:
+        catalog_module.load_embedder()
+    return time.perf_counter() - start
+
+
+def hour_is_unambiguous(normalized):
+    if rules.PERIOD_PATTERN.search(normalized) or rules.NOON_PATTERN.search(normalized):
+        return True
+    match = rules.TIME_PATTERN.search(normalized)
+    return bool(match) and int(match.group(1)) not in range(1, 13)
+
+
+def build_review_fields(ticket, text, catalog, from_embedding):
+    review = set(ticket.empty_fields())
+    product = catalog.by_id.get(ticket.producto_id)
+    if product and catalog.siblings(product):
+        heard = not from_embedding and catalog.is_unambiguous(normalize_text(text), product)
+        if not heard:
+            review.add("medida")
+    if ticket.hora_entrega and not hour_is_unambiguous(normalize_text(text)):
+        review.add("hora_entrega")
+    return [name for name in TICKET_FIELDS if name in review]
+
+
+def build_result(text, mode, transcription_seconds):
+    settings = get_mode(mode)
+    catalog = catalog_module.load_catalog()
+    start = time.perf_counter()
+    if settings["extractor"] == "llm":
+        ticket, used_fallback = llm.extract(text, catalog)
     else:
-        try:
-            campos = _extraer_transformer(texto, catalogo)
-        except Exception:
-            campos = extraer_con_reglas(texto, catalogo)
-    ticket = Ticket(
-        cliente="",
-        producto=campos.get("producto"),
-        cantidad=campos.get("cantidad"),
-        medida=campos.get("medida"),
-        hora_entrega="",
-        transcripcion=texto,
-    )
-    return ticket
+        ticket, used_fallback = rules.extract(text, catalog), False
+    from_embedding = False
+    if settings["embeddings"] and ticket.producto_id is None:
+        found = catalog.match_by_embedding(text)
+        if found:
+            ticket = ticket.with_product(found[0])
+            from_embedding = True
+    ticket.review_fields = build_review_fields(ticket, text, catalog, from_embedding)
+    extraction_seconds = time.perf_counter() - start
+    return PipelineResult(text, ticket, transcription_seconds, extraction_seconds, used_fallback)
 
 
-run = audio_a_ticket
+def process_audio(path, mode):
+    settings = get_mode(mode)
+    start = time.perf_counter()
+    audio = load_audio(path)
+    vocabulary = catalog_module.load_catalog().vocabulary_prompt() if settings["vocabulary_prompt"] else None
+    text = transcription.transcribe(audio, settings["whisper"], vocabulary)
+    return build_result(text, mode, time.perf_counter() - start)
+
+
+def process_text(text, mode):
+    return build_result(text, mode, 0.0)
