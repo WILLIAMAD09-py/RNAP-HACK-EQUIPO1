@@ -34,7 +34,6 @@ Fuentes del curso, en la raíz del repo: `RNAP_Hack_2026_Challenge_Tracks.docx`,
 | # | Bloqueo | Qué detiene |
 |---|---|---|
 | B1 | **No hay audio.** El brief exige que el equipo grabe 30+ notas de voz con voces, velocidades y ruido distintos, cada una con su ticket correcto | WER, Whisper y toda evaluación real |
-| B2 | `notebooks/entrenamiento.ipynb` es JSON inválido y no abre. Se reemplaza por el reporte de la sección 3.1 | Secciones 1 a 3 del reporte |
 
 El catálogo `data/catalog.csv` ya cumple: 42 productos, dentro del rango de 30 a 50.
 
