@@ -213,6 +213,8 @@ Los parámetros que se documentan con su efecto son tamaño de Whisper, prompt i
 
 **Entorno:** Python 3.11 en `.venv/`. El código funciona en CPU, usa GPU si existe, fija semillas y no usa rutas absolutas. El audio se decodifica con PyAV, sin depender de `ffmpeg`.
 
+**GPU:** todo entrenamiento, ajuste fino o evaluación pesada corre en la **RTX 5050 Laptop (8 GB)** de Jesús. Antes de empezar, confirmar que `torch.cuda.is_available()` es `True` y que el dispositivo es esa GPU. Si no lo es, detenerse y avisar: nunca entrenar en CPU sin decirlo. Esta GPU necesita PyTorch con CUDA 12.8 (`cu128`). Si la memoria no alcanza, bajar el tamaño de lote antes de cambiar de modelo.
+
 **Estructura:**
 
 ```text
