@@ -26,7 +26,9 @@ env/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Data
+# Data / Audio (heavy files - do not upload)
+data/*.wav
+data/*.mp3
 data/*.csv
 data/*.json
 data/*.zip
