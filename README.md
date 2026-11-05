@@ -1,8 +1,8 @@
-# RNAP Hack 2026 — Receipt
+# RNAP Hack 2026 — Team 1
 
-## Track 3: Voice Note to Order
+## Track 4: The Assistant That Doesn't Make Things Up
 
-A voice assistant that transcribes customer voice notes and extracts order fields using Whisper small + regex rules (baseline) and Whisper large + LLM extraction (pre-trained model), evaluated by WER and percentage of correct fields.
+An assistant that retrieves the correct article from a knowledge base using TF-IDF (baseline) and multilingual embeddings (pre-trained model), evaluated by the percentage of correct articles in the top 3 results.
 
 ## Repository structure
 
@@ -14,7 +14,7 @@ A voice assistant that transcribes customer voice notes and extracts order field
 │   └── entrenamiento.ipynb  # Main notebook (technical report)
 ├── app/                     # Interface code (free technology)
 ├── requirements.txt         # Project dependencies
-└── data/                    # Small audio samples or link to data source
+└── data/                    # Small samples or link to data source
 ```
 
 ## Checkpoints
