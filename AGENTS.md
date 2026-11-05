@@ -329,6 +329,8 @@ cifras obtenidas, lo que quedó sin hacer y dudas. Máximo 200 palabras.
 **Cómo hacer commit:**
 
 - Mensaje corto en inglés que describe el cambio, como pide la guía: `add regex baseline`, `fix data split`.
+- Debajo del título va un cuerpo que le cuente al equipo **qué se hizo**: qué cambió, cómo usarlo y si alguien debe hacer algo después. Así todos pueden seguir el avance en GitHub sin preguntar.
+- Antes de hacer push, revisar que cada commit que se va a subir lleve ese mensaje. La única excepción son los commits de checkpoint, que llevan solo su clave.
 - Agregar archivos por nombre. Nunca `git add -A` ni `git add .`.
 - Un cambio lógico por commit. Si el diff pasa de unas 150 líneas de código, dividirlo.
 - Prohibido `--force`, reescribir historia ya subida y `--no-verify`.
