@@ -51,13 +51,27 @@ class Catalog:
         self._patterns = [re.compile(rf"\b{term_regex(term)}\b") for term, _ in self.terms]
         self._term_vectors = None
 
+    def find_all(self, normalized_text):
+        found = sorted((SynonymMatch(product, match.start(), match.end())
+                        for pattern, (_, product) in zip(self._patterns, self.terms)
+                        for match in pattern.finditer(normalized_text)),
+                       key=lambda item: (item.start, -item.end))
+        clusters = []
+        cluster_end = -1
+        for item in found:
+            if clusters and item.start < cluster_end:
+                clusters[-1].append(item)
+                cluster_end = max(cluster_end, item.end)
+            else:
+                clusters.append([item])
+                cluster_end = item.end
+        winners = [max(cluster, key=lambda item: (item.end, item.end - item.start)) for cluster in clusters]
+        seen = set()
+        return [item for item in winners if not (item.product.id in seen or seen.add(item.product.id))]
+
     def find_by_synonym(self, normalized_text):
-        found = []
-        for pattern, (_, product) in zip(self._patterns, self.terms):
-            match = pattern.search(normalized_text)
-            if match:
-                found.append(SynonymMatch(product, match.start(), match.end()))
-        return max(found, key=lambda item: (item.end, item.end - item.start), default=None)
+        matches = self.find_all(normalized_text)
+        return matches[0] if matches else None
 
     def siblings(self, product):
         family = (product.categoria, product.unidad, product.nombre.split()[0])

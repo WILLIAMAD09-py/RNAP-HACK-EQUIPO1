@@ -16,6 +16,8 @@ def print_result(result):
         print(f"{label}: {'(vacío)' if value in (None, '') else value}")
     if ticket.review_fields:
         print(f"Por confirmar: {', '.join(ticket.review_fields)}")
+    if result.extra_products:
+        print(f"Otros productos detectados: {', '.join(result.extra_products)}")
     if result.used_fallback:
         print("AVISO: Ollama no respondió; este ticket salió de las reglas (línea base), no del modelo de lenguaje.")
     print(f"Tiempos: transcripción {result.transcription_seconds:.2f} s, extracción {result.extraction_seconds:.2f} s")
