@@ -66,10 +66,10 @@ def _assign_splits(ordered_ids):
 def make_split(notes_path=NOTES_PATH, audio_dir=AUDIO_DIR, splits_path=SPLITS_PATH, catalog=None):
     notes = load_notes(notes_path, audio_dir, catalog)
     rng = random.Random(SEED)
-    assignment = {}
+    ordered = []
     for speaker in sorted(notes["speaker"].unique()):
-        group = notes[notes["speaker"] == speaker]
-        assignment.update(_assign_splits(_interleave_by_noise(group, rng)))
+        ordered += _interleave_by_noise(notes[notes["speaker"] == speaker], rng)
+    assignment = _assign_splits(ordered)
     splits = pd.DataFrame({"note_id": notes["note_id"], "split": notes["note_id"].map(assignment)})
     splits.to_csv(splits_path, index=False)
     return splits

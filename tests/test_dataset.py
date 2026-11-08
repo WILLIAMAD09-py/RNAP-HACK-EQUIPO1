@@ -38,6 +38,16 @@ def test_split_is_60_20_20_per_speaker_and_deterministic(tmp_path):
     assert len(set(merged.loc[merged["split"] == "test", "noise"])) >= 2
 
 
+def test_small_groups_still_give_a_20_percent_test_split(tmp_path):
+    rows = make_rows(speakers=("ana", "beto", "caro"), per_speaker=7) + make_rows(speakers=("dani",), per_speaker=6)
+    notes_path, audio_dir = write_notes(tmp_path, rows)
+    splits = dataset.make_split(notes_path, audio_dir, tmp_path / "splits.csv")
+    counts = splits["split"].value_counts().to_dict()
+    assert counts["train"] == 16 and counts["test"] >= 5 and counts["val"] >= 5
+    merged = splits.merge(pd.read_csv(notes_path), on="note_id")
+    assert merged.loc[merged["split"] == "test", "speaker"].nunique() == 4
+
+
 def test_load_split_returns_only_that_split(tmp_path):
     notes_path, audio_dir = write_notes(tmp_path, make_rows())
     splits_path = tmp_path / "splits.csv"
