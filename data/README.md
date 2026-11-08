@@ -52,3 +52,12 @@ Una fila por nota. Escríbela **antes** de correr el modelo, con lo que realment
 | `hora_entrega` | Formato de 24 horas | `15:00` |
 
 Si un dato no se dijo, deja esa columna vacía. Si un texto lleva coma, ponlo entre comillas dobles.
+
+## Cómo se armó el `notes.csv` actual
+
+- 30 audios grabados por el equipo: jack 01-08, jesus 01-07, william 01-08, carlos 01-07.
+- `jack_05`, `william_04` y `carlos_03` son copias idénticas de `jack_04`, `william_01` y `carlos_02`. Se dejaron fuera para que una misma nota no quede en train y en prueba a la vez, así que hay **27 notas**. Faltan 3 notas nuevas para llegar al mínimo de 30.
+- `transcript` es un **borrador** hecho con `openai/whisper-large-v3`, un modelo que no se evalúa, con unas pocas correcciones de ortografía. Falta que el equipo lo revise escuchando cada audio.
+- Si la nota pide varios productos, el ticket correcto es el **primer producto mencionado**, con su cantidad.
+- `cliente` va sin título: "el ingeniero Carlos Ruiz" se anota como `Carlos Ruiz` y "el maestro Beto" como `Beto`.
+- `noise` y `speed` son estimaciones automáticas: el ruido sale del nivel de fondo del audio y la velocidad de las palabras por segundo. Falta que el equipo las confirme.
