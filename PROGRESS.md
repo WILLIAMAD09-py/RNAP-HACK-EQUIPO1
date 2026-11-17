@@ -1,5 +1,35 @@
 # Progress Log
 
+## CP3 - 2026-11-17
+
+- What we have done:
+  - Built the Transformer solution (`--mode solution`): Whisper small with the catalog vocabulary as initial prompt, qwen3:4b for client, product and size, regex rules for quantity and time, and multilingual sentence embeddings to match the product when the language model finds none.
+  - Evaluated it on the same 5 test notes on the RTX 5050 GPU, with no fallback:
+
+    | Model | WER | Fields correct | Time per note (mean) |
+    |---|---|---|---|
+    | Baseline: Whisper small + regex rules | 18.3% | 60.0% | 4.69 s |
+    | Pre-trained: Whisper medium + qwen3:4b | 12.7% | 76.0% | 11.66 s |
+    | Solution: hybrid | 19.8% | 88.0% | 7.61 s |
+
+  - Measured the effect of each parameter on validation: Whisper base, small and medium, with and without the vocabulary prompt, and similarity thresholds 0.4, 0.6 and 0.8.
+  - Wrote sections 4 and 5 of the notebook with two charts and seven real error cases.
+  - Replaced the Gradio interface with a FastAPI backend (`app/server.py`) and a React + Tailwind interface (`app/web/`). It works end to end with real voice notes in about 7 s.
+
+- What we haven't done yet:
+  - The test set has only 5 notes, so one error moves the score by 20 points.
+  - The language model takes about 6 of the 7 seconds per note.
+  - Check the interface with the microphone in the browser.
+
+- Next step:
+  - CP4: test the interface with live recordings and publish it. Phase 3: make extraction faster and add the cross-attention map.
+
+- Who did what:
+  - Jesús: hybrid solution, evaluation, notebook sections 4 and 5, new interface.
+  - The team should complete this list before CP3.
+
+---
+
 ## CP2 - 2026-11-08
 
 - What we have done:
