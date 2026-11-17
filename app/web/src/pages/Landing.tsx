@@ -81,6 +81,12 @@ const steps = [
   },
 ]
 
+const testRuns = [
+  { name: 'baseline_test', label: 'Línea base: Whisper small + reglas' },
+  { name: 'pretrained_test', label: 'Preentrenado: Whisper medium + LLM' },
+  { name: 'solution_test', label: 'Receipt: solución híbrida' },
+]
+
 const team = ['William', 'Jack', 'Carlos', 'Jesús']
 
 function Results() {
@@ -93,7 +99,10 @@ function Results() {
   if (metrics === null) {
     return <div className="mx-auto h-40 max-w-md animate-pulse rounded-3xl bg-mist" />
   }
-  if (metrics.length === 0) {
+  const shown = testRuns
+    .map((r) => ({ metric: metrics.find((m) => m.name === r.name && m.split === 'test'), label: r.label }))
+    .filter((r): r is { metric: Metric; label: string } => r.metric !== undefined)
+  if (shown.length === 0) {
     return (
       <div className="mx-auto max-w-md rounded-3xl border-2 border-dashed border-petrol/20 bg-white p-10 text-center">
         <i className="bi bi-hourglass-split text-3xl text-coral" aria-hidden />
@@ -103,39 +112,42 @@ function Results() {
     )
   }
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {metrics.map((m) => (
-        <Reveal key={`${m.name}-${m.split}`}>
-          <div className="rounded-3xl bg-white p-7 shadow-xl shadow-deep/5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-extrabold capitalize text-deep">{m.name}</h3>
-              <span className="rounded-full bg-mist px-3 py-1 text-xs font-bold text-petrol">
-                {m.split} · {m.notes} notas
-              </span>
-            </div>
-            <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-3xl font-extrabold text-petrol">
-                  <CountUp to={m.fields_correct * 100} decimals={0} suffix="%" />
-                </p>
-                <p className="mt-1 text-xs font-semibold text-petrol/70">Campos correctos</p>
+    <div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {shown.map(({ metric: m, label }) => {
+          const hero = m.name === 'solution_test'
+          return (
+            <Reveal key={m.name}>
+              <div className={`h-full rounded-3xl p-7 shadow-xl ${hero ? 'bg-coral/10 ring-2 ring-coral shadow-coral/20' : 'bg-white shadow-deep/5'}`}>
+                <h3 className={`text-lg font-extrabold ${hero ? 'text-coral' : 'text-deep'}`}>{label}</h3>
+                <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <p className={`text-3xl font-extrabold ${hero ? 'text-coral' : 'text-petrol'}`}>
+                      <CountUp to={m.fields_correct * 100} decimals={0} suffix="%" />
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-petrol/70">Campos correctos</p>
+                  </div>
+                  <div>
+                    <p className={`text-3xl font-extrabold ${hero ? 'text-coral' : 'text-petrol'}`}>
+                      <CountUp to={m.wer * 100} decimals={1} suffix="%" />
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-petrol/70">WER</p>
+                  </div>
+                  <div>
+                    <p className={`text-3xl font-extrabold ${hero ? 'text-coral' : 'text-petrol'}`}>
+                      <CountUp to={m.total_seconds_mean} decimals={1} suffix=" s" />
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-petrol/70">Tiempo medio</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-3xl font-extrabold text-coral">
-                  <CountUp to={m.wer * 100} decimals={1} suffix="%" />
-                </p>
-                <p className="mt-1 text-xs font-semibold text-petrol/70">WER</p>
-              </div>
-              <div>
-                <p className="text-3xl font-extrabold text-petrol">
-                  <CountUp to={m.total_seconds_mean} decimals={1} suffix=" s" />
-                </p>
-                <p className="mt-1 text-xs font-semibold text-petrol/70">Tiempo medio</p>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      ))}
+            </Reveal>
+          )
+        })}
+      </div>
+      <p className="mt-6 text-center text-sm text-petrol/70">
+        Conjunto de prueba: {shown[0].metric.notes} notas de voz grabadas por el equipo
+      </p>
     </div>
   )
 }
