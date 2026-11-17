@@ -1,4 +1,5 @@
 import csv
+import difflib
 import re
 from dataclasses import dataclass
 from functools import lru_cache
@@ -9,6 +10,18 @@ from receipt.config import CATALOG_PATH, EMBEDDING_MODEL, SIMILARITY_THRESHOLD
 from receipt.numbers import normalize_text
 
 MAX_WINDOW_WORDS = 5
+STOP_WORDS = {"para", "piezas", "pieza", "metros", "metro", "kilos", "kilo", "bultos", "bulto", "cajas", "caja",
+              "cubeta", "cubetas", "litros", "litro", "unidades", "como", "pulgada", "pulgadas", "tipo"}
+
+
+def spec_tokens(text):
+    tokens = re.split(r"[^a-z0-9]+|(?<=\d)x(?=\d)", normalize_text(text))
+    return {token for token in tokens if re.search(r"\d", token)}
+
+
+def content_words(text):
+    return {word for word in normalize_text(text).split()
+            if len(word) >= 4 and word.isalpha() and word not in STOP_WORDS}
 
 
 @dataclass(frozen=True)
@@ -109,13 +122,25 @@ class Catalog:
     def mentions_product(self, phrase, product):
         return any(match.product.id == product.id for match in self.find_all(normalize_text(phrase)))
 
-    def match_by_embedding(self, text, threshold=SIMILARITY_THRESHOLD):
+    def shares_content_word(self, phrase, product):
+        product_words = {word for term in (product.nombre, *product.sinonimos)
+                         for word in content_words(term)}
+        product_specs = {token for term in (product.nombre, *product.sinonimos, product.medida)
+                         for token in spec_tokens(term)}
+        if not spec_tokens(phrase) <= product_specs:
+            return False
+        return any(difflib.SequenceMatcher(None, word, other).ratio() >= 0.8
+                   for word in content_words(phrase) for other in product_words)
+
+    def match_by_embedding(self, text, threshold=SIMILARITY_THRESHOLD, whole_phrase=False):
         embedder = load_embedder()
         term_vectors = self.term_vectors()
         words = normalize_text(text).split()
         windows = {" ".join(words[i:i + size])
                    for size in range(2, MAX_WINDOW_WORDS + 1)
                    for i in range(len(words) - size + 1)} or {" ".join(words)}
+        if whole_phrase:
+            windows = {" ".join(words)}
         queries = embedder.encode(sorted(windows), normalize_embeddings=True, convert_to_numpy=True)
         similarity = queries @ term_vectors.T
         best_term = int(np.argmax(np.max(similarity, axis=0)))

@@ -48,7 +48,7 @@ def test_other_modes_keep_their_extractor():
 class FakeCatalogEmbeddings:
     def __init__(self, monkeypatch, match=None, similarity=0.0):
         from receipt.catalog import Catalog
-        monkeypatch.setattr(Catalog, "match_by_embedding", lambda self, text, threshold=0.6: match)
+        monkeypatch.setattr(Catalog, "match_by_embedding", lambda self, text, threshold=0.6, whole_phrase=False: match)
         monkeypatch.setattr(Catalog, "product_similarity", lambda self, phrase, product: similarity)
 
 
@@ -94,3 +94,49 @@ def test_similar_phrase_is_kept_by_embeddings(monkeypatch):
     result = pipeline.process_text("5 de alambre grueso", "solution")
     assert result.ticket.producto_id == "CAB-003"
     assert result.ticket.fuera_de_catalogo is False
+
+
+def test_misheard_block_stays_with_llm_product(monkeypatch):
+    FakeCatalogEmbeddings(monkeypatch, match=None, similarity=0.2)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "blog de concreto quince por veinte por cuarenta",
+         "producto_id": "MAT-006", "cantidad": 50, "hora_entrega": None}))
+    result = pipeline.process_text("cincuenta piezas de blog de concreto quince por veinte por cuarenta", "solution")
+    assert result.ticket.producto_id == "MAT-006"
+    assert result.ticket.fuera_de_catalogo is False
+
+
+def test_screws_with_cement_id_are_out_of_catalog(monkeypatch):
+    FakeCatalogEmbeddings(monkeypatch, match=None, similarity=0.1)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "tornillos M4", "producto_id": "MAT-001",
+         "cantidad": 200, "hora_entrega": None}))
+    result = pipeline.process_text("200 tornillos M4", "solution")
+    assert result.ticket.producto_id is None
+    assert result.ticket.fuera_de_catalogo is True
+
+
+def test_phrase_fallback_compares_whole_phrase(monkeypatch):
+    seen = {}
+    from receipt.catalog import Catalog
+
+    def fake_match(self, text, threshold=0.6, whole_phrase=False):
+        seen.update(text=text, threshold=threshold, whole=whole_phrase)
+
+    monkeypatch.setattr(Catalog, "match_by_embedding", fake_match)
+    monkeypatch.setattr(Catalog, "product_similarity", lambda self, phrase, product: 0.0)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "tornillos M4", "producto_id": None,
+         "cantidad": 1, "hora_entrega": None}))
+    pipeline.process_text("1 tornillos M4", "solution")
+    assert seen["whole"] is True and seen["threshold"] > 0.6
+
+
+def test_screws_with_wrong_spec_are_not_accepted_by_shared_word(monkeypatch):
+    FakeCatalogEmbeddings(monkeypatch, match=None, similarity=0.1)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "tornillos M4", "producto_id": "FIJ-001",
+         "cantidad": 200, "hora_entrega": None}))
+    result = pipeline.process_text("200 tornillos M4", "solution")
+    assert result.ticket.producto_id is None
+    assert result.ticket.fuera_de_catalogo is True

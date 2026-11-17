@@ -62,13 +62,13 @@ def resolve_product(ticket, text, catalog, settings):
     phrase = ticket.producto_solicitado
     product = catalog.by_id.get(ticket.producto_id)
     if product and phrase:
-        coherent = catalog.mentions_product(phrase, product) or (
+        coherent = catalog.mentions_product(phrase, product) or catalog.shares_content_word(phrase, product) or (
             settings["embeddings"] and catalog.product_similarity(phrase, product) >= settings["threshold"])
         if not coherent:
             ticket, product = ticket.without_product(), None
     if product is None and settings["embeddings"]:
         threshold = settings["threshold"] + (PHRASE_MATCH_MARGIN if phrase else 0)
-        found = catalog.match_by_embedding(phrase or text, threshold)
+        found = catalog.match_by_embedding(phrase or text, threshold, whole_phrase=bool(phrase))
         if found:
             return ticket.with_product(found[0]), True
     if product is None and phrase:
