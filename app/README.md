@@ -1,19 +1,13 @@
 # App
 
-Gradio interface for Receipt. It only calls `receipt.pipeline`, with no order logic of its own.
-
-The interface must:
-
-- Record with the microphone or upload an audio file
-- Show the transcript and an editable ticket
-- Highlight the fields that need confirmation
-- Add the confirmed order to the day's list
+FastAPI backend for Receipt. It only calls `receipt.pipeline` and `receipt.orders`, with no order logic of its own. The React frontend lives in `app/web/` and talks to the endpoints in `docs/api-contract.md`.
 
 ## Run
 
 ```bash
-python -m app.app            # http://127.0.0.1:7860
-python -m app.app --share    # public Gradio link
+python -m app.server                  # http://127.0.0.1:8000, loads the solution mode at startup
+python -m app.server --modes baseline,pretrained,solution
+python -m app.server --no-models      # development without models
 ```
 
-All three modes (`baseline`, `pretrained`, `solution`) are loaded once at startup. `solution` is the default.
+If `app/web/dist/` exists it is served at `/`. For development run Vite on port 5173, which proxies `/api` to the server.
