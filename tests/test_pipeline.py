@@ -69,3 +69,11 @@ def test_meridiem_makes_hour_unambiguous():
     result = pipeline.process_text("Soy Ana, 2 bultos de cemento, para las 3.30 pm", "baseline")
     assert result.ticket.hora_entrega == "15:30"
     assert "hora_entrega" not in result.ticket.review_fields
+
+
+def test_overrides_replace_mode_settings():
+    settings = pipeline.get_mode("solution", {"whisper": "openai/whisper-base", "threshold": None, "vocabulary_prompt": False})
+    assert settings["whisper"] == "openai/whisper-base"
+    assert settings["vocabulary_prompt"] is False
+    assert settings["threshold"] == 0.6
+    assert pipeline.get_mode("solution")["vocabulary_prompt"] is True

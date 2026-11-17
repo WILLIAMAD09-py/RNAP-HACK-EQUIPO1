@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 import urllib.request
 
 from receipt.config import OLLAMA_MODEL, OLLAMA_TIMEOUT_SECONDS, OLLAMA_URL
@@ -57,6 +58,19 @@ def ticket_from_data(data, catalog, text):
                     hora_entrega=normalize_time(data.get("hora_entrega")))
     product = catalog.by_id.get(data.get("producto_id"))
     return ticket.with_product(product) if product else ticket
+
+
+def merge_hybrid(llm_ticket, rules_ticket):
+    return replace(llm_ticket,
+                   cantidad=rules_ticket.cantidad or llm_ticket.cantidad,
+                   hora_entrega=rules_ticket.hora_entrega or llm_ticket.hora_entrega)
+
+
+def extract_hybrid(text, catalog):
+    ticket, used_fallback = extract(text, catalog)
+    if used_fallback:
+        return ticket, True
+    return merge_hybrid(ticket, rules.extract(text, catalog)), False
 
 
 def extract(text, catalog):

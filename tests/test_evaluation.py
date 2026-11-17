@@ -69,3 +69,14 @@ def test_comparison_table(tmp_path):
 
 def test_wer_fraction_forms_match():
     assert evaluation.word_error_rate(["tubo de tres cuartos"], ["tubo de 3 cuartos"]) == 0.0
+
+
+def test_tag_and_parameters_are_saved(tmp_path):
+    settings = {"whisper": "openai/whisper-base", "extractor": "hybrid", "vocabulary_prompt": False, "threshold": 0.5}
+    summary = evaluation.summarize(make_rows(), "solution", "val", 1.0, "cpu", settings, "base-novoc")
+    assert summary["whisper_model"] == "openai/whisper-base"
+    assert summary["vocabulary_prompt"] is False and summary["threshold"] == 0.5
+    evaluation.save_results(summary, make_rows(), tmp_path)
+    assert (tmp_path / "solution-base-novoc_val.json").exists()
+    assert (tmp_path / "solution-base-novoc_val_notes.csv").exists()
+    assert "| solution-base-novoc | val |" in evaluation.comparison_table(tmp_path)

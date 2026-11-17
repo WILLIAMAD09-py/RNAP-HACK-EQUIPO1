@@ -20,14 +20,14 @@ class PipelineResult:
     extra_products: list = field(default_factory=list)
 
 
-def get_mode(mode):
+def get_mode(mode, overrides=None):
     if mode not in MODES:
         raise ValueError(f"Modo desconocido: {mode}. Opciones: {', '.join(MODES)}")
-    return MODES[mode]
+    return {**MODES[mode], **{key: value for key, value in (overrides or {}).items() if value is not None}}
 
 
-def load_models(mode):
-    settings = get_mode(mode)
+def load_models(mode, overrides=None):
+    settings = get_mode(mode, overrides)
     start = time.perf_counter()
     transcription.load_model(settings["whisper"])
     if settings["embeddings"]:
@@ -56,17 +56,19 @@ def build_review_fields(ticket, text, catalog, from_embedding, has_extra_product
     return [name for name in TICKET_FIELDS if name in review]
 
 
-def build_result(text, mode, transcription_seconds):
-    settings = get_mode(mode)
+def build_result(text, mode, transcription_seconds, overrides=None):
+    settings = get_mode(mode, overrides)
     catalog = catalog_module.load_catalog()
     start = time.perf_counter()
-    if settings["extractor"] == "llm":
+    if settings["extractor"] == "hybrid":
+        ticket, used_fallback = llm.extract_hybrid(text, catalog)
+    elif settings["extractor"] == "llm":
         ticket, used_fallback = llm.extract(text, catalog)
     else:
         ticket, used_fallback = rules.extract(text, catalog), False
     from_embedding = False
     if settings["embeddings"] and ticket.producto_id is None:
-        found = catalog.match_by_embedding(text)
+        found = catalog.match_by_embedding(text, settings["threshold"])
         if found:
             ticket = ticket.with_product(found[0])
             from_embedding = True
@@ -77,14 +79,14 @@ def build_result(text, mode, transcription_seconds):
     return PipelineResult(text, ticket, transcription_seconds, extraction_seconds, used_fallback, extra_products)
 
 
-def process_audio(path, mode):
-    settings = get_mode(mode)
+def process_audio(path, mode, overrides=None):
+    settings = get_mode(mode, overrides)
     start = time.perf_counter()
     audio = load_audio(path)
     vocabulary = catalog_module.load_catalog().vocabulary_prompt() if settings["vocabulary_prompt"] else None
     text = transcription.transcribe(audio, settings["whisper"], vocabulary)
-    return build_result(text, mode, time.perf_counter() - start)
+    return build_result(text, mode, time.perf_counter() - start, overrides)
 
 
-def process_text(text, mode):
-    return build_result(text, mode, 0.0)
+def process_text(text, mode, overrides=None):
+    return build_result(text, mode, 0.0, overrides)

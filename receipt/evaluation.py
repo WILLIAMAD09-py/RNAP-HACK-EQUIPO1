@@ -44,17 +44,20 @@ def _stats(values):
     return {"mean": round(float(np.mean(values)), 4), "p95": round(float(np.percentile(values, 95)), 4)}
 
 
-def summarize(rows, mode, split, model_load_seconds, device):
+def summarize(rows, mode, split, model_load_seconds, device, settings=None, tag=None):
     frame = pd.DataFrame(rows)
     per_field = {name: round(float(frame[f"{name}_ok"].mean()), 4) for name in TICKET_FIELDS}
     totals = frame["transcription_seconds"] + frame["extraction_seconds"]
-    settings = MODES[mode]
+    settings = settings or MODES[mode]
     return {
         "mode": mode,
+        "tag": tag,
         "split": split,
         "whisper_model": settings["whisper"],
         "device": device,
         "extractor": settings["extractor"],
+        "vocabulary_prompt": settings["vocabulary_prompt"],
+        "threshold": settings.get("threshold"),
         "notes": len(frame),
         "wer": word_error_rate(frame["transcript_ref"], frame["transcript_hyp"]),
         "fields_correct": round(float(np.mean([frame[f"{n}_ok"].mean() for n in TICKET_FIELDS])), 4),
@@ -69,20 +72,22 @@ def summarize(rows, mode, split, model_load_seconds, device):
 
 def save_results(summary, rows, results_dir=RESULTS_DIR):
     results_dir.mkdir(parents=True, exist_ok=True)
-    stem = f"{summary['mode']}_{summary['split']}"
+    name = f"{summary['mode']}-{summary['tag']}" if summary.get("tag") else summary["mode"]
+    stem = f"{name}_{summary['split']}"
     (results_dir / f"{stem}.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
     pd.DataFrame(rows).to_csv(results_dir / f"{stem}_notes.csv", index=False, encoding="utf-8")
 
 
-def evaluate(mode, split):
+def evaluate(mode, split, overrides=None, tag=None):
     from receipt import pipeline
 
+    settings = pipeline.get_mode(mode, overrides)
     notes = dataset.load_split(split)
-    model_load_seconds = pipeline.load_models(mode)
-    pipeline.process_audio(notes.iloc[0]["audio_path"], mode)
+    model_load_seconds = pipeline.load_models(mode, overrides)
+    pipeline.process_audio(notes.iloc[0]["audio_path"], mode, overrides)
     rows = []
     for _, note in notes.iterrows():
-        result = pipeline.process_audio(note["audio_path"], mode)
+        result = pipeline.process_audio(note["audio_path"], mode, overrides)
         scores = score_fields(note, result.ticket)
         rows.append({
             "note_id": note["note_id"],
@@ -98,8 +103,8 @@ def evaluate(mode, split):
             "extraction_seconds": result.extraction_seconds,
             "used_fallback": result.used_fallback,
         })
-    device = transcription.load_model(MODES[mode]["whisper"])[2]
-    summary = summarize(rows, mode, split, model_load_seconds, device)
+    device = transcription.load_model(settings["whisper"])[2]
+    summary = summarize(rows, mode, split, model_load_seconds, device, settings, tag)
     save_results(summary, rows)
     return summary
 
@@ -113,7 +118,7 @@ def comparison_table(results_dir=RESULTS_DIR):
     lines = ["| " + " | ".join(header) + " |", "|" + "---|" * len(header)]
     for item in summaries:
         wer = "n/d" if item["wer"] is None else f"{item['wer']:.1%}"
-        cells = [item["mode"], item["split"], item["notes"], wer, f"{item['fields_correct']:.1%}"]
+        cells = [f"{item['mode']}-{item['tag']}" if item.get("tag") else item["mode"], item["split"], item["notes"], wer, f"{item['fields_correct']:.1%}"]
         cells += [f"{item['field_accuracy'][name]:.1%}" for name in TICKET_FIELDS]
         cells += [f"{item['transcription_seconds']['mean']:.2f}", f"{item['extraction_seconds']['mean']:.2f}",
                   f"{item['total_seconds']['p95']:.2f}", f"{item['model_load_seconds']:.1f}", item["fallback_notes"], item.get("device", "n/d")]

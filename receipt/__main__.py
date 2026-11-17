@@ -36,6 +36,10 @@ def build_parser():
     evaluate = commands.add_parser("evaluate", help="evalúa un modo sobre una división")
     evaluate.add_argument("--mode", choices=list(MODES), required=True)
     evaluate.add_argument("--split", choices=list(SPLIT_RATIOS), required=True)
+    evaluate.add_argument("--whisper", help="modelo de Whisper que sustituye al del modo")
+    evaluate.add_argument("--no-vocabulary", action="store_true", help="sin vocabulario del catálogo como prompt")
+    evaluate.add_argument("--threshold", type=float, help="umbral de similitud de embeddings")
+    evaluate.add_argument("--tag", help="etiqueta para guardar results/<modo>-<tag>_<división>")
     commands.add_parser("compare", help="tabla Markdown con los resultados guardados")
     return parser
 
@@ -62,7 +66,10 @@ def main(argv=None):
                 print("ADVERTENCIA: no hay GPU CUDA; la evaluación correrá en CPU y será lenta. "
                       "Los tiempos no son comparables con los de GPU.", file=sys.stderr)
             from receipt import evaluation
-            print(json.dumps(evaluation.evaluate(args.mode, args.split), indent=2, ensure_ascii=False))
+            overrides = {"whisper": args.whisper, "threshold": args.threshold,
+                         "vocabulary_prompt": False if args.no_vocabulary else None}
+            summary = evaluation.evaluate(args.mode, args.split, overrides, args.tag)
+            print(json.dumps(summary, indent=2, ensure_ascii=False))
         else:
             from receipt import evaluation
             print(evaluation.comparison_table())
