@@ -25,8 +25,8 @@
   - CP4: test the interface with live recordings and publish it. Phase 3: make extraction faster and add the cross-attention map.
 
 - Who did what:
-  - Jesús: hybrid solution, evaluation, notebook sections 4 and 5, new interface.
-  - The team should complete this list before CP3.
+  - Jesús: hybrid solution, evaluation, notebook sections 4 and 5, new interface, with AI coding agents.
+  - Carlos: commit with his changes in this phase.
 
 ---
 
