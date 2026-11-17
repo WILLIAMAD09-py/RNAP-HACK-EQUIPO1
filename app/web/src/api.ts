@@ -14,6 +14,8 @@ export interface TicketData {
   cantidad: number | null
   medida: string
   hora_entrega: string
+  producto_solicitado?: string | null
+  fuera_de_catalogo?: boolean
 }
 
 export interface SiblingOption {
@@ -60,6 +62,43 @@ export interface OrderPayload {
   hora_entrega: string
 }
 
+export interface InboxCustomer {
+  name: string
+  username: string | null
+  chat_id: number
+}
+
+export interface InboxItem {
+  id: string
+  received_at: string
+  source: string
+  customer: InboxCustomer
+  status: 'pending' | 'accepted' | 'rejected'
+  audio_url: string
+  result: ProcessResult
+}
+
+export interface Reply {
+  id: string
+  label: string
+  text: string
+}
+
+export interface TelegramStatus {
+  enabled: boolean
+  bot_username: string | null
+}
+
+export interface AcceptPayload {
+  cliente: string
+  producto_id: string | null
+  producto_solicitado: string | null
+  cantidad: number
+  medida: string
+  hora_entrega: string
+  reply: string
+}
+
 async function parse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let detail = ''
@@ -98,5 +137,20 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+    }),
+  inbox: () => request<InboxItem[]>('/api/inbox'),
+  replies: () => request<Reply[]>('/api/replies'),
+  telegram: () => request<TelegramStatus>('/api/telegram'),
+  acceptInbox: (id: string, payload: AcceptPayload) =>
+    request<InboxItem>(`/api/inbox/${id}/accept`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }),
+  rejectInbox: (id: string, reply: string) =>
+    request<InboxItem>(`/api/inbox/${id}/reject`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reply }),
     }),
 }
