@@ -45,7 +45,7 @@ def hour_is_unambiguous(normalized):
 
 
 def build_review_fields(ticket, text, catalog, from_embedding, has_extra_products=False):
-    review = set(ticket.empty_fields())
+    review = set(ticket.empty_fields()) | set(ticket.review_fields)
     product = catalog.by_id.get(ticket.producto_id)
     if product and catalog.siblings(product):
         heard = not from_embedding and catalog.is_unambiguous(normalize_text(text), product)
@@ -72,6 +72,9 @@ def resolve_product(ticket, text, catalog, settings):
         if found:
             return ticket.with_product(found[0]), True
     if product is None and phrase:
+        lexical = catalog.best_lexical_match(phrase)
+        if lexical:
+            return replace(ticket.with_product(lexical), review_fields=["medida"]), False
         ticket = replace(ticket, fuera_de_catalogo=True)
     return ticket, False
 

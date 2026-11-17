@@ -140,3 +140,29 @@ def test_screws_with_wrong_spec_are_not_accepted_by_shared_word(monkeypatch):
     result = pipeline.process_text("200 tornillos M4", "solution")
     assert result.ticket.producto_id is None
     assert result.ticket.fuera_de_catalogo is True
+
+
+def test_lexical_fallback_picks_unique_candidate_and_flags_measure(monkeypatch):
+    FakeCatalogEmbeddings(monkeypatch, match=None, similarity=0.1)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "blog de concreto quince por veinte por cuarenta",
+         "producto_id": None, "cantidad": 50, "hora_entrega": None}))
+    result = pipeline.process_text("cincuenta piezas de blog de concreto quince por veinte por cuarenta", "solution")
+    assert result.ticket.producto_id == "MAT-006"
+    assert result.ticket.fuera_de_catalogo is False
+    assert "medida" in result.ticket.review_fields
+
+
+def test_lexical_fallback_tie_stays_out_of_catalog(monkeypatch):
+    FakeCatalogEmbeddings(monkeypatch, match=None, similarity=0.1)
+    monkeypatch.setattr(llm, "call_ollama", fake_reply(
+        {"cliente": None, "producto_solicitado": "tornillos M4", "producto_id": None,
+         "cantidad": 5, "hora_entrega": None}))
+    result = pipeline.process_text("5 tornillos M4", "solution")
+    assert result.ticket.fuera_de_catalogo is True
+
+
+def test_prompt_asks_for_bare_product_name_and_tolerates_misspellings():
+    from receipt.catalog import load_catalog
+    prompt = llm.build_messages("x", load_catalog())[0]["content"]
+    assert "sin la cantidad" in prompt and "mal transcrito" in prompt

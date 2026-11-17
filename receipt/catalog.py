@@ -122,15 +122,25 @@ class Catalog:
     def mentions_product(self, phrase, product):
         return any(match.product.id == product.id for match in self.find_all(normalize_text(phrase)))
 
-    def shares_content_word(self, phrase, product):
+    def shared_word_count(self, phrase, product):
         product_words = {word for term in (product.nombre, *product.sinonimos)
                          for word in content_words(term)}
         product_specs = {token for term in (product.nombre, *product.sinonimos, product.medida)
                          for token in spec_tokens(term)}
         if not spec_tokens(phrase) <= product_specs:
-            return False
-        return any(difflib.SequenceMatcher(None, word, other).ratio() >= 0.8
-                   for word in content_words(phrase) for other in product_words)
+            return 0
+        return sum(any(difflib.SequenceMatcher(None, word, other).ratio() >= 0.8 for other in product_words)
+                   for word in content_words(phrase))
+
+    def shares_content_word(self, phrase, product):
+        return self.shared_word_count(phrase, product) > 0
+
+    def best_lexical_match(self, phrase):
+        scores = sorted(((self.shared_word_count(phrase, product), product) for product in self.products),
+                        key=lambda item: -item[0])
+        if not scores or scores[0][0] == 0 or (len(scores) > 1 and scores[1][0] == scores[0][0]):
+            return None
+        return scores[0][1]
 
     def match_by_embedding(self, text, threshold=SIMILARITY_THRESHOLD, whole_phrase=False):
         embedder = load_embedder()
