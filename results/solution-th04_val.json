@@ -1,0 +1,34 @@
+{
+  "mode": "solution",
+  "tag": "th04",
+  "split": "val",
+  "whisper_model": "openai/whisper-small",
+  "device": "cuda",
+  "extractor": "hybrid",
+  "vocabulary_prompt": true,
+  "threshold": 0.4,
+  "notes": 6,
+  "wer": 0.1111111111111111,
+  "fields_correct": 0.9,
+  "field_accuracy": {
+    "cliente": 1.0,
+    "producto_id": 1.0,
+    "cantidad": 0.6667,
+    "medida": 1.0,
+    "hora_entrega": 0.8333
+  },
+  "transcription_seconds": {
+    "mean": 0.7097,
+    "p95": 0.9516
+  },
+  "extraction_seconds": {
+    "mean": 6.9651,
+    "p95": 8.1873
+  },
+  "total_seconds": {
+    "mean": 7.6748,
+    "p95": 9.0522
+  },
+  "model_load_seconds": 9.0004,
+  "fallback_notes": 0
+}
