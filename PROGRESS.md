@@ -1,5 +1,25 @@
 # Progress Log
 
+## CP4 - 2026-11-17
+
+- What we have done:
+  - Interface v1 connected to the model: a FastAPI server (`app/server.py`) and a React + Tailwind web app (`app/web/`) with a landing page, a test page that records or uploads a voice note and shows the transcript and the editable ticket, and the day's order list.
+  - Telegram bot (@rnyap_bot): customers send a voice note, the order arrives at the store panel (`/tienda`) with a sound, and the store accepts or rejects it with a predefined reply that the bot sends back.
+  - Store panel with pending orders, today's orders and a made-up inventory saved in the browser.
+  - Off-catalog products: if the customer asks for something we do not sell (for example "tornillos M4"), the ticket shows it as it was said instead of forcing a wrong product.
+
+- What we haven't done yet:
+  - Re-run the evaluation with the off-catalog filter. The CP3 numbers come from the code before that change.
+  - Ollama runs on the CPU, so extraction takes about 6 to 10 seconds per note.
+
+- Next step:
+  - Phase 3: run the language model on the GPU, re-evaluate, add the cross-attention map and rehearse with new noisy voice notes.
+
+- Who did what:
+  - Jesús: server, interface, Telegram bot and store panel, with AI coding agents.
+
+---
+
 ## CP3 - 2026-11-17
 
 - What we have done:
