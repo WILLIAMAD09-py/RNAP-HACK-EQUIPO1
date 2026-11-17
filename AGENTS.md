@@ -12,7 +12,7 @@ Fuente única de verdad del proyecto. La leen OpenCode y Antigravity de forma na
 
 **Campos del ticket:** nombre del cliente, producto, cantidad, medida y hora de entrega.
 
-**Qué se construye:** una interfaz en **Gradio** donde el usuario graba con el micrófono o sube un audio. Muestra la transcripción y un **ticket editable**, y un botón de confirmar agrega el pedido a la lista del día.
+**Qué se construye:** una interfaz web en **React + Tailwind** con backend **FastAPI** donde el usuario graba con el micrófono o sube un audio. Muestra la transcripción y un **ticket editable**, y un botón de confirmar agrega el pedido a la lista del día.
 
 **Prueba del juez:** graba una nota de voz nueva en vivo, en el salón y con ruido de fondo.
 
@@ -98,7 +98,7 @@ El curso exige este archivo y vale 25 puntos en el PIA, así que **no se borra**
 | F2.3 | Configuración documentada con el **efecto observado** de cada parámetro | 15 | Ambos |
 | F2.4 | 5+ casos de error con causa propuesta, secciones 4 y 5 | 10 | Ambos |
 | — | **Subir CP3** al terminar lo anterior | — | Persona |
-| F2.5 | Interfaz v1 en Gradio conectada al modelo: audio, transcripción y ticket | 20 | Agente |
+| F2.5 | Interfaz v1 (React + FastAPI) conectada al modelo: audio, transcripción y ticket | 20 | Agente |
 | F2.6 | CP3 y CP4 en horario, `PROGRESS.md` al día, commits de cada integrante | 15 | Persona |
 | F2.7 | Cada integrante sube a NEXUS el ZIP del commit CP4 con comprobante | — | Persona |
 
@@ -204,8 +204,9 @@ Los parámetros que se documentan con su efecto son tamaño de Whisper, prompt i
 
 **Interfaz y publicación:**
 
-- Gradio con micrófono y carga de audio, transcripción, ticket editable, botón de confirmar y lista del día.
-- Durante clase se puede compartir con `share=True` de Gradio.
+- **Decisión del equipo (2026-11-17):** se reemplazó Gradio por React + Vite + Tailwind (`app/web/`), componentes de React Bits, íconos de Bootstrap Icons (sin emojis) y paleta azul petróleo con coral. El backend `app/server.py` (FastAPI) expone `receipt.pipeline` según `docs/api-contract.md` y sirve el frontend compilado. El brief del reto dice "Interface in Gradio", pero la guía de GitHub deja la tecnología libre; si el docente lo objeta, se recupera la versión Gradio del commit `1836719`.
+- Landing que explica el proyecto con botón grande "Probar Receipt", y vista de app con micrófono y carga de audio, transcripción, ticket editable, botón de confirmar y lista del día.
+- Durante clase se puede compartir con un túnel HTTPS (por ejemplo `cloudflared`) hacia el servidor local.
 - Versión final en Hugging Face Spaces (CPU gratuita) o en la laptop del equipo. Se elige midiendo la velocidad, y el otro queda de respaldo.
 - El micrófono del navegador exige HTTPS o `localhost`, así que se prueba en el mismo modo en que se va a presentar.
 - Los modelos se cargan una sola vez al iniciar, nunca en cada petición.
@@ -229,7 +230,7 @@ receipt/           lógica de la aplicación, sin interfaz
   dataset.py       notas de voz y división
   evaluation.py    WER, campos y tiempos
   orders.py        lista de pedidos confirmados
-app/               interfaz Gradio
+app/               server.py (FastAPI) y web/ (React + Tailwind)
 tests/             pruebas sin modelos ni red
 results/           métricas de cada corrida
 ```
