@@ -1,0 +1,7 @@
+Configuración,WER %,Campos %,Transcripción (s),Total (s),Carga (s),Respaldo
+whisper-base,23.0,83.3,0.3857,6.6587,199.2419,0
+"whisper-small, sin vocabulario",8.9,86.7,0.6824,7.4442,18.6609,0
+"whisper-small, vocabulario, umbral 0.6 (solución)",11.1,90.0,0.6242,7.269,20.6032,0
+"whisper-small, vocabulario, umbral 0.4",11.1,90.0,0.7097,7.6748,9.0004,0
+"whisper-small, vocabulario, umbral 0.8",11.1,90.0,0.6788,7.6768,10.5401,0
+"whisper-medium, vocabulario, umbral 0.6",12.6,100.0,3.0173,10.086,13.3489,0
