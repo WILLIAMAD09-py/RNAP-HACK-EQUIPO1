@@ -383,7 +383,11 @@ Pendiente:
 4. Cómo mejorar la robustez ante ruido sin reentrenar.
 5. Límites actuales de Hugging Face Spaces para audio y modelos de este tamaño.
 
-## 9. Decisiones pendientes del equipo
+## 9. Decisiones del equipo
+
+- **2026-11-17:** el cuaderno de Colab ya no se continúa; el reporte técnico vive en `results/`, `PROGRESS.md` y `README.md`. Ya no se exige un commit propio de cada integrante por fase. Los commits `CP3` y `CP4` los hizo el orquestador por indicación de Jesús.
+
+### Pendientes
 
 - [ ] Definir responsable del repositorio y responsable del cuaderno.
 - [ ] Repartir la grabación de las notas de voz.
