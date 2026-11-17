@@ -95,17 +95,29 @@ class Catalog:
     def vocabulary_prompt(self):
         return "Pedido de ferretería: " + ", ".join(product.sinonimos[0] for product in self.products) + "."
 
+    def term_vectors(self):
+        if self._term_vectors is None:
+            self._term_vectors = load_embedder().encode(
+                [term for term, _ in self.terms], normalize_embeddings=True, convert_to_numpy=True)
+        return self._term_vectors
+
+    def product_similarity(self, phrase, product):
+        rows = [index for index, (_, owner) in enumerate(self.terms) if owner.id == product.id]
+        query = load_embedder().encode([normalize_text(phrase)], normalize_embeddings=True, convert_to_numpy=True)
+        return float(np.max(query @ self.term_vectors()[rows].T))
+
+    def mentions_product(self, phrase, product):
+        return any(match.product.id == product.id for match in self.find_all(normalize_text(phrase)))
+
     def match_by_embedding(self, text, threshold=SIMILARITY_THRESHOLD):
         embedder = load_embedder()
-        if self._term_vectors is None:
-            self._term_vectors = embedder.encode(
-                [term for term, _ in self.terms], normalize_embeddings=True, convert_to_numpy=True)
+        term_vectors = self.term_vectors()
         words = normalize_text(text).split()
         windows = {" ".join(words[i:i + size])
                    for size in range(2, MAX_WINDOW_WORDS + 1)
                    for i in range(len(words) - size + 1)} or {" ".join(words)}
         queries = embedder.encode(sorted(windows), normalize_embeddings=True, convert_to_numpy=True)
-        similarity = queries @ self._term_vectors.T
+        similarity = queries @ term_vectors.T
         best_term = int(np.argmax(np.max(similarity, axis=0)))
         score = float(np.max(similarity))
         if score < threshold:

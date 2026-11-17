@@ -11,16 +11,18 @@ SCHEMA = {
     "type": "object",
     "properties": {
         "cliente": {"type": ["string", "null"]},
+        "producto_solicitado": {"type": ["string", "null"]},
         "producto_id": {"type": ["string", "null"]},
         "cantidad": {"type": ["integer", "null"]},
         "hora_entrega": {"type": ["string", "null"]},
     },
-    "required": ["cliente", "producto_id", "cantidad", "hora_entrega"],
+    "required": ["cliente", "producto_solicitado", "producto_id", "cantidad", "hora_entrega"],
 }
 
 SYSTEM_PROMPT = """Eres el capturista de pedidos de una ferretería en Monterrey. Recibes la transcripción de una nota de voz y devuelves un JSON con estos campos:
 - cliente: nombre de quien pide, tal como se dijo, o null. Solo si la persona dice su nombre ("soy...", "habla...", "de parte de..."); si nadie lo dice, cliente es null. Nunca uses una palabra común como nombre.
-- producto_id: el id del catálogo que corresponde al producto pedido, o null si ninguno coincide.
+- producto_solicitado: la frase textual del producto en la transcripción, tal como la dijo el cliente (por ejemplo "tornillos M4", "cable del doce"), o null si no pidió ninguno.
+- producto_id: el id del catálogo que corresponde al producto pedido. Si el producto pedido no está en el catálogo, producto_id es null; nunca elijas un producto parecido de otra categoría.
 - cantidad: cuántas unidades se piden, como entero, o null.
 - hora_entrega: hora de entrega en formato 24 horas HH:MM, o null.
 Reglas: el calibre o la medida forman parte del producto y NO son la cantidad. Ejemplo: en "50 metros de cable del doce" la cantidad es 50 y el 12 es el calibre del producto. En "cable calibre 12, 50 metros" también. Convierte la hora a 24 horas: "las tres de la tarde" es "15:00". Si un dato no se dijo, usa null. Nunca inventes datos.
@@ -54,7 +56,9 @@ def ticket_from_data(data, catalog, text):
         first_word = strip_accents(cliente.split()[0]).lower()
         if first_word in rules.NAME_STOPWORDS or normalize_text(cliente) not in normalize_text(text):
             cliente = None
-    ticket = Ticket(cliente=cliente, cantidad=cantidad if cantidad and cantidad > 0 else None,
+    solicitado = data.get("producto_solicitado")
+    solicitado = solicitado.strip() if isinstance(solicitado, str) and solicitado.strip() else None
+    ticket = Ticket(cliente=cliente, producto_solicitado=solicitado, cantidad=cantidad if cantidad and cantidad > 0 else None,
                     hora_entrega=normalize_time(data.get("hora_entrega")))
     product = catalog.by_id.get(data.get("producto_id"))
     return ticket.with_product(product) if product else ticket

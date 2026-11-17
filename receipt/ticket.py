@@ -13,9 +13,14 @@ class Ticket:
     medida: str | None = None
     hora_entrega: str | None = None
     review_fields: list[str] = field(default_factory=list)
+    producto_solicitado: str | None = None
+    fuera_de_catalogo: bool = False
 
     def with_product(self, product):
         return replace(self, producto_id=product.id, producto=product.nombre, medida=product.medida)
+
+    def without_product(self):
+        return replace(self, producto_id=None, producto=None, medida=None)
 
     def empty_fields(self):
         return [name for name in TICKET_FIELDS if getattr(self, name) in (None, "")]

@@ -1,5 +1,5 @@
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from receipt import catalog as catalog_module
 from receipt import transcription
@@ -8,6 +8,8 @@ from receipt.config import MODES
 from receipt.extraction import llm, rules
 from receipt.numbers import normalize_text
 from receipt.ticket import TICKET_FIELDS, Ticket
+
+PHRASE_MATCH_MARGIN = 0.15
 
 
 @dataclass
@@ -56,6 +58,24 @@ def build_review_fields(ticket, text, catalog, from_embedding, has_extra_product
     return [name for name in TICKET_FIELDS if name in review]
 
 
+def resolve_product(ticket, text, catalog, settings):
+    phrase = ticket.producto_solicitado
+    product = catalog.by_id.get(ticket.producto_id)
+    if product and phrase:
+        coherent = catalog.mentions_product(phrase, product) or (
+            settings["embeddings"] and catalog.product_similarity(phrase, product) >= settings["threshold"])
+        if not coherent:
+            ticket, product = ticket.without_product(), None
+    if product is None and settings["embeddings"]:
+        threshold = settings["threshold"] + (PHRASE_MATCH_MARGIN if phrase else 0)
+        found = catalog.match_by_embedding(phrase or text, threshold)
+        if found:
+            return ticket.with_product(found[0]), True
+    if product is None and phrase:
+        ticket = replace(ticket, fuera_de_catalogo=True)
+    return ticket, False
+
+
 def build_result(text, mode, transcription_seconds, overrides=None):
     settings = get_mode(mode, overrides)
     catalog = catalog_module.load_catalog()
@@ -67,7 +87,9 @@ def build_result(text, mode, transcription_seconds, overrides=None):
     else:
         ticket, used_fallback = rules.extract(text, catalog), False
     from_embedding = False
-    if settings["embeddings"] and ticket.producto_id is None:
+    if settings["extractor"] != "rules" and not used_fallback:
+        ticket, from_embedding = resolve_product(ticket, text, catalog, settings)
+    elif settings["embeddings"] and ticket.producto_id is None:
         found = catalog.match_by_embedding(text, settings["threshold"])
         if found:
             ticket = ticket.with_product(found[0])

@@ -4,7 +4,7 @@ import sys
 
 from receipt.config import MODES, SPLIT_RATIOS
 
-FIELD_LABELS = [("cliente", "Cliente"), ("producto", "Producto"), ("producto_id", "ID producto"),
+FIELD_LABELS = [("cliente", "Cliente"), ("producto_solicitado", "Producto solicitado"), ("producto", "Producto"), ("producto_id", "ID producto"),
                 ("cantidad", "Cantidad"), ("medida", "Medida"), ("hora_entrega", "Hora de entrega")]
 
 
@@ -14,6 +14,8 @@ def print_result(result):
     for name, label in FIELD_LABELS:
         value = getattr(ticket, name)
         print(f"{label}: {'(vacío)' if value in (None, '') else value}")
+    if ticket.fuera_de_catalogo:
+        print("AVISO: el producto solicitado no está en el catálogo.")
     if ticket.review_fields:
         print(f"Por confirmar: {', '.join(ticket.review_fields)}")
     if result.extra_products:

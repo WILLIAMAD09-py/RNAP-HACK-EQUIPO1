@@ -77,3 +77,14 @@ def test_overrides_replace_mode_settings():
     assert settings["vocabulary_prompt"] is False
     assert settings["threshold"] == 0.6
     assert pipeline.get_mode("solution")["vocabulary_prompt"] is True
+
+
+def test_out_of_catalog_order_is_confirmed(tmp_path):
+    from receipt import orders
+    from receipt.ticket import Ticket
+    path = tmp_path / "orders.csv"
+    orders.confirm(Ticket(cliente="Luis", producto_solicitado="tornillos M4", cantidad=200,
+                          hora_entrega="17:00", fuera_de_catalogo=True), path)
+    lines = path.read_text(encoding="utf-8").splitlines()
+    assert "producto_solicitado" in lines[0]
+    assert "tornillos M4" in lines[1] and ",200," in lines[1]
